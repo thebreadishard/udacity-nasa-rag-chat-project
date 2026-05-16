@@ -17,6 +17,9 @@ import os
 import json
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 from typing import Dict, List, Any, Optional, Tuple
 import chromadb
 from chromadb.config import Settings
