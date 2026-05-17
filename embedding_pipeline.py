@@ -91,11 +91,42 @@ class ChromaEmbeddingPipelineTextOnly:
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-        # TODO: Handle short texts that don't need chunking
-        # TODO: Implement chunking logic with overlap
-        # TODO: Try to break at sentence boundaries
-        # TODO: Create metadata for each chunk
-        pass
+        # Handle short texts that don't need chunking
+        if len(text) <= self.chunk_size:
+            chunk_metadata = {**metadata, "chunk_index": 0, "total_chunks": 1}
+            return [(text, chunk_metadata)]
+
+        # Implement chunking logic with overlap, trying to break at sentence boundaries
+        chunks = []
+        start = 0
+        step = self.chunk_size - self.chunk_overlap
+
+        while start < len(text):
+            end = start + self.chunk_size
+
+            if end < len(text):
+                # Try to break at sentence boundary (. ! ?)
+                boundary = max(
+                    text.rfind(". ", start, end),
+                    text.rfind("! ", start, end),
+                    text.rfind("? ", start, end)
+                )
+                if boundary > start:
+                    end = boundary + 1
+
+            chunk = text[start:end].strip()
+            if chunk:
+                # Create metadata for each chunk
+                chunk_metadata = {**metadata, "chunk_index": len(chunks), "total_chunks": -1}
+                chunks.append((chunk, chunk_metadata))
+
+            start += step
+
+        # Update total_chunks now that we know the final count
+        total = len(chunks)
+        chunks = [(c, {**m, "total_chunks": total}) for c, m in chunks]
+
+        return chunks
     
     def check_document_exists(self, doc_id: str) -> bool:
         """
