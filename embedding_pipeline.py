@@ -260,6 +260,27 @@ class ChromaEmbeddingPipelineTextOnly:
             logger.error(f"Error generating embedding: {e}")
             raise
 
+    def _get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
+        """
+        Get OpenAI embeddings for a batch of texts in a single API call
+
+        Args:
+            texts: List of texts to embed
+
+        Returns:
+            List of embedding vectors in the same order as input
+        """
+        try:
+            response = self.openai_client.embeddings.create(
+                input=texts,
+                model=self.embedding_model
+            )
+            # API guarantees results are returned in order by index
+            return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+        except Exception as e:
+            logger.error(f"Error generating batch embeddings: {e}")
+            raise
+
     def generate_document_id(self, file_path: Path, metadata: Dict[str, Any]) -> str:
         """
         Generate stable document ID based on file path and chunk position
@@ -445,39 +466,66 @@ class ChromaEmbeddingPipelineTextOnly:
         
         # Handle different update modes (skip, update, replace)
         if update_mode == 'replace':
-            self.delete_documents_by_source(str(file_path))
+            self.delete_documents_by_source(file_path.stem)  # use stem to match stored metadata
         
-        # Process documents in batches
+        # Process documents in true batches: one existence check, one embedding call, one insert per batch
         for batch_start in range(0, len(documents), batch_size):
             batch = documents[batch_start:batch_start + batch_size]
-            for text, metadata in batch:
-                # Generate document ID
-                doc_id = self.generate_document_id(file_path, metadata)
-                # Check if exists
-                exists = self.check_document_exists(doc_id)
-                if exists and update_mode == 'skip':
-                    stats['skipped'] += 1
-                    continue
-                # Get embedding
-                embedding = self.get_embedding(text)
-                # Add or update in collection
-                if exists and update_mode == 'update':
-                    self.collection.update(
-                        ids=[doc_id],
-                        embeddings=[embedding],
-                        documents=[text],
-                        metadatas=[metadata]
-                    )
-                    stats['updated'] += 1
-                else:
+            batch_texts = [text for text, _ in batch]
+            batch_metadatas = [meta for _, meta in batch]
+            batch_ids = [self.generate_document_id(file_path, meta) for meta in batch_metadatas]
+
+            # Bulk existence check — one collection.get() for the whole batch
+            existing_result = self.collection.get(ids=batch_ids)
+            existing_ids = set(existing_result['ids'])
+
+            if update_mode == 'skip':
+                new_mask = [id_ not in existing_ids for id_ in batch_ids]
+                stats['skipped'] += sum(1 for m in new_mask if not m)
+                new_ids = [id_ for id_, m in zip(batch_ids, new_mask) if m]
+                new_texts = [t for t, m in zip(batch_texts, new_mask) if m]
+                new_metas = [meta for meta, m in zip(batch_metadatas, new_mask) if m]
+                if new_ids:
+                    embeddings = self._get_embeddings_batch(new_texts)
                     self.collection.add(
-                        ids=[doc_id],
-                        embeddings=[embedding],
-                        documents=[text],
-                        metadatas=[metadata]
+                        ids=new_ids,
+                        embeddings=embeddings,
+                        documents=new_texts,
+                        metadatas=new_metas
                     )
-                    stats['added'] += 1
-        
+                    stats['added'] += len(new_ids)
+
+            elif update_mode == 'update':
+                embeddings = self._get_embeddings_batch(batch_texts)
+                to_add = [(id_, emb, t, m) for id_, emb, t, m in zip(batch_ids, embeddings, batch_texts, batch_metadatas) if id_ not in existing_ids]
+                to_upd = [(id_, emb, t, m) for id_, emb, t, m in zip(batch_ids, embeddings, batch_texts, batch_metadatas) if id_ in existing_ids]
+                if to_add:
+                    self.collection.add(
+                        ids=[x[0] for x in to_add],
+                        embeddings=[x[1] for x in to_add],
+                        documents=[x[2] for x in to_add],
+                        metadatas=[x[3] for x in to_add]
+                    )
+                    stats['added'] += len(to_add)
+                if to_upd:
+                    self.collection.update(
+                        ids=[x[0] for x in to_upd],
+                        embeddings=[x[1] for x in to_upd],
+                        documents=[x[2] for x in to_upd],
+                        metadatas=[x[3] for x in to_upd]
+                    )
+                    stats['updated'] += len(to_upd)
+
+            else:  # replace — existing docs already deleted, just add everything
+                embeddings = self._get_embeddings_batch(batch_texts)
+                self.collection.add(
+                    ids=batch_ids,
+                    embeddings=embeddings,
+                    documents=batch_texts,
+                    metadatas=batch_metadatas
+                )
+                stats['added'] += len(batch_ids)
+
         # Return statistics
         return stats
     
@@ -524,8 +572,12 @@ class ChromaEmbeddingPipelineTextOnly:
                 
                 mission = self.extract_mission_from_path(file_path)
                 if mission not in stats['missions']:
-                    stats['missions'][mission] = 0
-                stats['missions'][mission] += len(chunks)
+                    stats['missions'][mission] = {'files': 0, 'chunks': 0, 'added': 0, 'updated': 0, 'skipped': 0}
+                stats['missions'][mission]['files'] += 1
+                stats['missions'][mission]['chunks'] += len(chunks)
+                stats['missions'][mission]['added'] += file_stats['added']
+                stats['missions'][mission]['updated'] += file_stats['updated']
+                stats['missions'][mission]['skipped'] += file_stats['skipped']
                 
             except Exception as e:
                 # Handle errors gracefully
