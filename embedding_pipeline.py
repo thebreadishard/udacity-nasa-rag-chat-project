@@ -138,9 +138,10 @@ class ChromaEmbeddingPipelineTextOnly:
         Returns:
             True if document exists, False otherwise
         """
-        # TODO: Query collection for document ID
-        # TODO: Return True if exists, False otherwise
-        pass
+        # Query collection for document ID
+        result = self.collection.get(ids=[doc_id])
+        # Return True if exists, False otherwise
+        return len(result["ids"]) > 0
     
     def update_document(self, doc_id: str, text: str, metadata: Dict[str, Any]) -> bool:
         """
