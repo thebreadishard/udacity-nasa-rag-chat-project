@@ -72,19 +72,17 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     if not documents:
         return ""
     
-    # TODO: Initialize list with header text for context section
+    context_parts = ["=== RETRIEVED DOCUMENTS ==="]
 
-    # TODO: Loop through paired documents and their metadata using enumeration
-        # TODO: Extract mission information from metadata with fallback value
-        # TODO: Clean up mission name formatting (replace underscores, capitalize)
-        # TODO: Extract source information from metadata with fallback value  
-        # TODO: Extract category information from metadata with fallback value
-        # TODO: Clean up category name formatting (replace underscores, capitalize)
-        
-        # TODO: Create formatted source header with index number and extracted information
-        # TODO: Add source header to context parts list
-        
-        # TODO: Check document length and truncate if necessary
-        # TODO: Add truncated or full document content to context parts list
+    for i, (doc, meta) in enumerate(zip(documents, metadatas), 1):
+        mission = meta.get("mission", "unknown").replace("_", " ").title()
+        source = meta.get("source", "unknown")
+        category = meta.get("document_category", "unknown").replace("_", " ").title()
 
-    # TODO: Join all context parts with newlines and return formatted string
+        header = f"\n--- Source {i}: {mission} | {source} | {category} ---"
+        context_parts.append(header)
+
+        max_chunk = 1500
+        context_parts.append(doc[:max_chunk] + "..." if len(doc) > max_chunk else doc)
+
+    return "\n".join(context_parts)
