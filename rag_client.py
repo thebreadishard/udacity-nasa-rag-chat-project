@@ -1,7 +1,12 @@
+import os
 import chromadb
 from chromadb.config import Settings
+from openai import OpenAI
+from dotenv import load_dotenv
 from typing import Dict, List, Optional
 from pathlib import Path
+
+load_dotenv()
 
 def discover_chroma_backends() -> Dict[str, Dict[str, str]]:
     """Discover available ChromaDB backends in the project directory"""
@@ -73,9 +78,17 @@ def retrieve_documents(collection, query: str, n_results: int = 3,
     if mission_filter and mission_filter.lower() not in ("all", ""):
         where_filter = {"mission": {"$eq": mission_filter}}
 
+    # Generate OpenAI embedding for the query to match stored document embeddings
+    openai_client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url=os.getenv("OPENAI_BASE_URL", "https://openai.vocareum.com/v1")
+    )
+    response = openai_client.embeddings.create(input=query, model="text-embedding-3-small")
+    query_embedding = response.data[0].embedding
+
     # Execute database query
     results = collection.query(
-        query_texts=[query],
+        query_embeddings=[query_embedding],
         n_results=n_results,
         where=where_filter
     )
