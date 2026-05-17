@@ -1,0 +1,42 @@
+[
+  {
+    "question": "What were the principal objectives of the Apollo 11 mission?",
+    "category": "overview",
+    "mission": "apollo_11"
+  },
+  {
+    "question": "What launch vehicle was used for Apollo 11 and what azimuth did it fly after liftoff?",
+    "category": "technical",
+    "mission": "apollo_11"
+  },
+  {
+    "question": "When and from where did Apollo 11 launch?",
+    "category": "timeline",
+    "mission": "apollo_11"
+  },
+  {
+    "question": "Who were the three crew members of Apollo 13 and what were their roles?",
+    "category": "crew",
+    "mission": "apollo_13"
+  },
+  {
+    "question": "What technical problems were reported during the Apollo 13 pre-launch countdown?",
+    "category": "emergency",
+    "mission": "apollo_13"
+  },
+  {
+    "question": "When did the Apollo 13 countdown begin and what issues arose in the final hour before launch?",
+    "category": "timeline",
+    "mission": "apollo_13"
+  },
+  {
+    "question": "Who were the seven crew members of Challenger mission STS-51L?",
+    "category": "crew",
+    "mission": "challenger"
+  },
+  {
+    "question": "What weather and environmental concerns were raised before the Challenger STS-51L launch?",
+    "category": "disaster_analysis",
+    "mission": "challenger"
+  }
+]
