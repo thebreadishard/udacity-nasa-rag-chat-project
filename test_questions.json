@@ -1,41 +1,49 @@
 [
   {
     "question": "What were the principal objectives of the Apollo 11 mission?",
+    "reference": "The principal and secondary detailed objectives of the Apollo 11 mission were completely accomplished. The mission aimed to land astronauts on the Moon and return them safely to Earth, with the Saturn V launch vehicle successfully placing the manned spacecraft in the planned translunar injection coast mode.",
     "category": "overview",
     "mission": "apollo_11"
   },
   {
     "question": "What launch vehicle was used for Apollo 11 and what azimuth did it fly after liftoff?",
+    "reference": "Apollo 11 used the Saturn V launch vehicle, designated AS-506. After liftoff it rolled to a flight azimuth of 72.058 degrees east of north.",
     "category": "technical",
     "mission": "apollo_11"
   },
   {
     "question": "When and from where did Apollo 11 launch?",
+    "reference": "Apollo 11 launched at 09:32:00 Eastern Daylight Time on July 16, 1969, from Kennedy Space Center, Launch Complex 39, Pad A.",
     "category": "timeline",
     "mission": "apollo_11"
   },
   {
     "question": "Who were the three crew members of Apollo 13 and what were their roles?",
+    "reference": "The three crew members of Apollo 13 were spacecraft commander Jim Lovell, command module pilot Jack Swigert, and lunar module pilot Fred Haise.",
     "category": "crew",
     "mission": "apollo_13"
   },
   {
     "question": "What technical problems were reported during the Apollo 13 pre-launch countdown?",
+    "reference": "During the Apollo 13 pre-launch countdown, the launch crew experienced problems with a vent valve in the first stage of the liquid oxygen tank. The valve appeared to be sticking but the problem was subsequently resolved and the valve was brought closed.",
     "category": "emergency",
     "mission": "apollo_13"
   },
   {
     "question": "When did the Apollo 13 countdown begin and what issues arose in the final hour before launch?",
+    "reference": "The Apollo 13 countdown was at T minus 1 hour 29 minutes at 11:43 a.m. CST on April 11, 1970. In the final hour, a vent valve in the first stage liquid oxygen tank appeared to be sticking but was later resolved. The crew was also configuring the stabilization and control system and checking the main propulsion engine.",
     "category": "timeline",
     "mission": "apollo_13"
   },
   {
     "question": "Who were the seven crew members of Challenger mission STS-51L?",
+    "reference": "The seven crew members of Challenger STS-51L were commander Francis Dick Scobie, pilot Michael Smith, mission specialists Judy Resnick, Ellison Onizuka, and Ronald McNair, and payload specialists Greg Jarvis and teacher and space participant Krista McAuliffe.",
     "category": "crew",
     "mission": "challenger"
   },
   {
     "question": "What weather and environmental concerns were raised before the Challenger STS-51L launch?",
+    "reference": "Before the Challenger STS-51L launch, upper level winds violated vehicle load factor limits, and surface winds were out of the northwest gusting up to 20 knots with scattered clouds at 2,500 and 25,000 feet. The launch had already been postponed 24 hours due to unacceptable weather. An ice debris inspection team was dispatched to examine the external tank for ice formation.",
     "category": "disaster_analysis",
     "mission": "challenger"
   }

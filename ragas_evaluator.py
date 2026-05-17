@@ -17,7 +17,7 @@ try:
 except ImportError:
     RAGAS_AVAILABLE = False
 
-def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -> Dict[str, float]:
+def evaluate_response_quality(question: str, answer: str, contexts: List[str], reference: Optional[str] = None) -> Dict[str, float]:
     """Evaluate response quality using RAGAS metrics"""
     if not RAGAS_AVAILABLE:
         return {"error": "RAGAS not available"}
@@ -51,7 +51,8 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -
     sample = SingleTurnSample(
         user_input=question,
         response=answer,
-        retrieved_contexts=contexts
+        retrieved_contexts=contexts,
+        reference=reference
     )
     # Evaluate the response using the metrics
     results = {}
@@ -103,6 +104,7 @@ def batch_evaluate(dataset_path: str, collection=None, openai_key: str = None) -
         question = entry.get("question", "")
         answer = entry.get("answer", "")
         contexts = entry.get("contexts", [])
+        reference = entry.get("reference", None)
 
         # End-to-end mode: retrieve and generate if not pre-supplied
         if (not answer or not contexts) and collection is not None and openai_key:
@@ -117,7 +119,7 @@ def batch_evaluate(dataset_path: str, collection=None, openai_key: str = None) -
                 context_str = ""
             answer = llm_client.generate_response(openai_key, question, context_str, [])
 
-        scores = evaluate_response_quality(question, answer, contexts)
+        scores = evaluate_response_quality(question, answer, contexts, reference=reference)
         per_question.append({"question": question, "scores": scores})
 
         # Accumulate for aggregate
