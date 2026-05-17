@@ -438,15 +438,42 @@ class ChromaEmbeddingPipelineTextOnly:
         
         stats = {'added': 0, 'updated': 0, 'skipped': 0}
         
-        # TODO: Handle different update modes (skip, update, replace)
-        # TODO: Process documents in batches
-        # TODO: For each document:
-        #   - Generate document ID
-        #   - Check if exists
-        #   - Get embedding
-        #   - Add or update in collection
-        # TODO: Return statistics
-
+        # Handle different update modes (skip, update, replace)
+        if update_mode == 'replace':
+            self.delete_documents_by_source(str(file_path))
+        
+        # Process documents in batches
+        for batch_start in range(0, len(documents), batch_size):
+            batch = documents[batch_start:batch_start + batch_size]
+            for text, metadata in batch:
+                # Generate document ID
+                doc_id = self.generate_document_id(file_path, metadata)
+                # Check if exists
+                exists = self.check_document_exists(doc_id)
+                if exists and update_mode == 'skip':
+                    stats['skipped'] += 1
+                    continue
+                # Get embedding
+                embedding = self.get_embedding(text)
+                # Add or update in collection
+                if exists and update_mode == 'update':
+                    self.collection.update(
+                        ids=[doc_id],
+                        embeddings=[embedding],
+                        documents=[text],
+                        metadatas=[metadata]
+                    )
+                    stats['updated'] += 1
+                else:
+                    self.collection.add(
+                        ids=[doc_id],
+                        embeddings=[embedding],
+                        documents=[text],
+                        metadatas=[metadata]
+                    )
+                    stats['added'] += 1
+        
+        # Return statistics
         return stats
     
     def process_all_text_data(self, base_path: str, update_mode: str = 'skip') -> Dict[str, int]:
