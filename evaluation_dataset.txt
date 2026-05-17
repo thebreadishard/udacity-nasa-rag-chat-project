@@ -1,0 +1,103 @@
+NASA RAG Chat — Evaluation Dataset
+=====================================
+Three sample questions used to evaluate the RAG system against prior knowledge.
+Each entry contains: the question, the expected answer based on historical knowledge,
+the actual answer returned by the RAG system, and a remark on the difference.
+
+
+------------------------------------------------------------------------
+QUESTION 1
+------------------------------------------------------------------------
+What were the names of the Apollo 11 command module and lunar module?
+
+EXPECTED ANSWER:
+The Apollo 11 command module was named "Columbia" and the lunar module was
+named "Eagle." These call signs were chosen by the crew and became iconic —
+"Eagle" gave rise to Neil Armstrong's famous words "The Eagle has landed"
+upon touchdown at the Sea of Tranquility on July 20, 1969.
+
+ACTUAL RAG ANSWER:
+The Apollo 11 command module was named CSM-107, and the lunar module was named
+LM-5. These details are provided in the documents referred to as "Apollo
+Spacecraft Flight History" and "Appendix B - Vehicle Descriptions."
+
+REMARK:
+The RAG system returned the hardware serial designations (CSM-107, LM-5) from
+technical archive documents, rather than the mission call signs (Columbia,
+Eagle). Both answers are technically accurate in different contexts: the call
+signs are how the vehicles were known during the mission and in public
+communication, while the hardware numbers appear in engineering documentation.
+The system correctly cited its sources. A retrieval improvement would be to
+also surface the mission transcript chunks where "Columbia" and "Eagle" are
+used directly by the crew.
+
+
+------------------------------------------------------------------------
+QUESTION 2
+------------------------------------------------------------------------
+What caused the oxygen tank explosion on Apollo 13?
+
+EXPECTED ANSWER:
+The root cause was damaged Teflon insulation on wiring inside oxygen tank 2.
+During pre-launch ground testing at the Kennedy Space Center, the tank was
+inadvertently subjected to higher voltage (65V) than it was rated for (28V)
+when ground crews tried to boil off residual oxygen. This burned away the
+Teflon insulation on internal wires. During the mission on April 13, 1970,
+when the crew performed a routine tank stir, the bare wires sparked inside
+the oxygen-rich environment, igniting the remaining Teflon and causing an
+explosion that ruptured the tank and severely damaged the service module.
+
+ACTUAL RAG ANSWER:
+The explosion was caused by an ignition of the Teflon insulation inside the
+oxygen tank due to high voltage applied to the heater. Specifically, an exposed
+wire inside oxygen tank 2 ignited the Teflon insulation. This event led to a
+subsequent chain of events resulting in the explosion. The system cited the
+"Apollo 13 Mission Commentary" transcript.
+
+REMARK:
+The RAG system's answer is substantively correct and matches the expected answer
+well. It correctly identified the high-voltage event and the Teflon insulation
+as the ignition source. The phrasing "exposed wire ignited the Teflon
+insulation" is slightly imprecise (the damaged Teflon on the wires was itself
+the fuel), but the causal chain is accurate. The answer is appropriately
+grounded in the mission documents and cites its source. This is a good
+demonstration of the system retrieving factually dense technical content.
+
+
+------------------------------------------------------------------------
+QUESTION 3
+------------------------------------------------------------------------
+At what time did the Challenger STS-51L launch, and what was the outside
+temperature at launch?
+
+EXPECTED ANSWER:
+The Challenger STS-51L launched at 11:38 AM Eastern Standard Time on
+January 28, 1986, from Launch Complex 39B at Kennedy Space Center. The
+ambient air temperature at launch time was approximately 36°F (2°C), which
+was the coldest launch in the shuttle program's history up to that point.
+Overnight temperatures had dropped to around 24–27°F, causing ice to form
+on the launch structure. The cold conditions were a critical factor: the
+low temperature caused the O-rings in the right solid rocket booster to
+become brittle and fail to seal properly, leading to the disaster
+73 seconds after liftoff.
+
+ACTUAL RAG ANSWER:
+The launch was tentatively planned for 10:38 AM Eastern Time. The temperature
+at the launch pad right before launch was 24 degrees Fahrenheit. The system
+cited the STS-51L Mission Audio transcript, quoting a PAO announcement about
+cloud cover, wind, and temperature conditions.
+
+REMARK:
+The RAG system's answer is partially correct but contains two notable
+discrepancies. First, 10:38 AM was an earlier planned launch time (delayed
+from the original January 27 attempt); the actual liftoff occurred at
+11:38 AM EST. The transcript chunk retrieved likely referred to a pre-launch
+status update rather than the moment of launch. Second, 24°F was the
+overnight low — by the time of actual liftoff, ambient temperature had risen
+to approximately 36°F, though the O-rings were still near freezing due to
+the ice overnight. This example illustrates a limitation of RAG on
+time-sensitive sequential data: the system retrieved a genuine excerpt from
+the transcript but from an earlier point in the timeline than the question
+intended. Increasing the number of retrieved chunks (n_results) or adding
+metadata filtering by time segment could improve accuracy on questions like
+this.
