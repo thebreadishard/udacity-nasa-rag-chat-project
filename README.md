@@ -203,6 +203,17 @@ data/
    print(scores)
    ```
 
+5. **Run Batch Evaluation**:
+   ```python
+   from ragas_evaluator import batch_evaluate
+   results = batch_evaluate("test_questions.json", collection, openai_key)
+   # results["aggregate"] — mean score per metric
+   # results["per_question"] — individual scores for each question
+   ```
+   Or use the **Batch Evaluation** section in the chat UI sidebar: enter the path to
+   `test_questions.json` and click **Run Batch Evaluation**. Results (per-question
+   scores and aggregate means) appear in the main area.
+
 ### **Integration Testing**
 
 1. **Run the complete pipeline**:

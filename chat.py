@@ -119,6 +119,8 @@ def main():
         st.session_state.last_evaluation = None
     if "last_contexts" not in st.session_state:
         st.session_state.last_contexts = []
+    if "batch_eval_results" not in st.session_state:
+        st.session_state.batch_eval_results = None
     
     # Sidebar for configuration
     with st.sidebar:
@@ -175,7 +177,16 @@ def main():
         # Evaluation settings
         st.subheader("📊 Evaluation Settings")
         enable_evaluation = st.checkbox("Enable RAGAS Evaluation", value=RAGAS_AVAILABLE)
-        
+
+        # Batch evaluation
+        st.subheader("🧪 Batch Evaluation")
+        batch_dataset_path = st.text_input(
+            "Dataset Path",
+            value="test_questions.json",
+            help="Path to test_questions.json"
+        )
+        run_batch = st.button("Run Batch Evaluation", disabled=not RAGAS_AVAILABLE)
+
         # Initialize RAG system when backend changes
         if (st.session_state.current_backend != selected_backend_key):
             st.session_state.current_backend = selected_backend_key
@@ -193,11 +204,39 @@ def main():
     if not success:
         st.error(f"Failed to initialize RAG system: {error}")
         st.stop()
-    
+
+    # Run batch evaluation if triggered
+    if run_batch:
+        with st.spinner("Running batch evaluation..."):
+            results = ragas_evaluator.batch_evaluate(batch_dataset_path, collection, openai_key)
+            st.session_state.batch_eval_results = results
+
     # Display evaluation metrics if available
     if st.session_state.last_evaluation and enable_evaluation:
         display_evaluation_metrics(st.session_state.last_evaluation)
     
+    # Display batch evaluation results if available
+    if st.session_state.batch_eval_results:
+        results = st.session_state.batch_eval_results
+        if "error" in results:
+            st.error(f"Batch evaluation error: {results['error']}")
+        else:
+            with st.expander("📊 Batch Evaluation Results", expanded=True):
+                agg = results.get("aggregate", {})
+                if agg:
+                    st.subheader("Aggregate Scores (mean)")
+                    cols = st.columns(len(agg))
+                    for col, (metric, score) in zip(cols, agg.items()):
+                        col.metric(metric.replace('_', ' ').title(), f"{score:.3f}")
+                st.subheader("Per-Question Results")
+                for i, item in enumerate(results.get("per_question", []), 1):
+                    st.markdown(f"**Q{i}: {item['question']}**")
+                    for metric, score in item.get("scores", {}).items():
+                        if isinstance(score, (int, float)):
+                            st.write(f"\u00a0\u00a0{metric}: {score:.3f}")
+                        else:
+                            st.write(f"\u00a0\u00a0{metric}: {score}")
+
     # Display chat messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
