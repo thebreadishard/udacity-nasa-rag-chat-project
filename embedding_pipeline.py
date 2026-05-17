@@ -531,8 +531,12 @@ class ChromaEmbeddingPipelineTextOnly:
     
     def get_collection_info(self) -> Dict[str, Any]:
         """Get information about the ChromaDB collection"""
-        # TODO: Return collection name, document count, metadata
-        pass
+        # Return collection name, document count, metadata
+        return {
+            'collection_name': self.collection_name,
+            'document_count': self.collection.count(),
+            'chroma_persist_directory': self.chroma_persist_directory
+        }
     
     def query_collection(self, query_text: str, n_results: int = 5) -> Dict[str, Any]:
         """
