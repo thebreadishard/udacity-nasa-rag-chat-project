@@ -549,8 +549,12 @@ class ChromaEmbeddingPipelineTextOnly:
         Returns:
             Query results
         """
-        # TODO: Perform test query and return results
-        pass
+        # Perform test query and return results
+        embedding = self.get_embedding(query_text)
+        return self.collection.query(
+            query_embeddings=[embedding],
+            n_results=n_results
+        )
     
     def get_collection_stats(self) -> Dict[str, Any]:
         """Get detailed statistics about the collection"""
