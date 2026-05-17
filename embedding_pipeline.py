@@ -20,14 +20,12 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from dotenv import load_dotenv
 import chromadb
-from chromadb.config import Settings  # TODO: verify this import path for chromadb==1.5.7
 import openai
 from openai import OpenAI
 import hashlib
 import time
 from datetime import datetime
 import argparse
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction  # TODO: verify this import path for chromadb==1.5.7
 
 load_dotenv()
 
