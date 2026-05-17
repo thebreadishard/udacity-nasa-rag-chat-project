@@ -68,6 +68,11 @@ class ChromaEmbeddingPipelineTextOnly:
             api_key=openai_api_key,
             base_url=os.getenv("OPENAI_BASE_URL", "https://openai.vocareum.com/v1")
         )
+        # Validate API key with a minimal test call before doing any real work
+        try:
+            self.openai_client.embeddings.create(input="test", model=embedding_model)
+        except Exception as e:
+            raise ValueError(f"OpenAI API key validation failed — no embeddings will be created. Error: {e}")
         # Store configuration parameters
         self.embedding_model = embedding_model
         self.chunk_size = chunk_size
@@ -606,8 +611,8 @@ def main():
     parser.add_argument('--chroma-dir', default='./chroma_db_openai', help='ChromaDB persist directory')
     parser.add_argument('--collection-name', default='nasa_space_missions_text', help='Collection name')
     parser.add_argument('--embedding-model', default='text-embedding-3-small', help='OpenAI embedding model')
-    parser.add_argument('--chunk-size', type=int, default=500, help='Text chunk size')
-    parser.add_argument('--chunk-overlap', type=int, default=100, help='Chunk overlap size')
+    parser.add_argument('--chunk-size', type=int, default=int(os.getenv('CHUNK_SIZE', 1500)), help='Text chunk size')
+    parser.add_argument('--chunk-overlap', type=int, default=int(os.getenv('CHUNK_OVERLAP', 150)), help='Chunk overlap size')
     parser.add_argument('--batch-size', type=int, default=50, help='Batch size for processing')
     parser.add_argument('--update-mode', choices=['skip', 'update', 'replace'], default='skip',
                        help='How to handle existing documents: skip, update, or replace')

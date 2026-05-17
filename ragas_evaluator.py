@@ -107,17 +107,31 @@ def batch_evaluate(dataset_path: str, collection=None, openai_key: str = None) -
         reference = entry.get("reference", None)
 
         # End-to-end mode: retrieve and generate if not pre-supplied
-        if (not answer or not contexts) and collection is not None and openai_key:
+        if not answer or not contexts:
+            if collection is None:
+                per_question.append({"question": question, "scores": {"error": "No collection provided for end-to-end mode"}})
+                continue
+            if not openai_key:
+                per_question.append({"question": question, "scores": {"error": "No API key provided for end-to-end mode"}})
+                continue
             import rag_client
             import llm_client
-            docs_result = rag_client.retrieve_documents(collection, question, n_results=3)
-            if docs_result and docs_result.get("documents"):
+            try:
+                docs_result = rag_client.retrieve_documents(collection, question, n_results=3)
+            except Exception as e:
+                per_question.append({"question": question, "scores": {"error": f"Retrieval failed: {e}"}})
+                continue
+            if docs_result and docs_result.get("documents") and docs_result["documents"][0]:
                 contexts = docs_result["documents"][0]
                 context_str = rag_client.format_context(contexts, docs_result["metadatas"][0])
             else:
-                contexts = []
-                context_str = ""
-            answer = llm_client.generate_response(openai_key, question, context_str, [])
+                per_question.append({"question": question, "scores": {"error": "Retrieval returned no documents"}})
+                continue
+            try:
+                answer = llm_client.generate_response(openai_key, question, context_str, [])
+            except Exception as e:
+                per_question.append({"question": question, "scores": {"error": f"LLM generation failed: {e}"}})
+                continue
 
         scores = evaluate_response_quality(question, answer, contexts, reference=reference)
         per_question.append({"question": question, "scores": scores})
