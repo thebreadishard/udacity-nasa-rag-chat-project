@@ -21,6 +21,8 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -
     """Evaluate response quality using RAGAS metrics"""
     if not RAGAS_AVAILABLE:
         return {"error": "RAGAS not available"}
+    if not question or not answer or not contexts:
+        return {"error": "Invalid input: question, answer, and contexts are required"}
     
     # Create evaluator LLM with model gpt-3.5-turbo
     evaluator_llm = LangchainLLMWrapper(
