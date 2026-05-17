@@ -17,19 +17,19 @@ import os
 import json
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
 from typing import Dict, List, Any, Optional, Tuple
+from dotenv import load_dotenv
 import chromadb
-from chromadb.config import Settings
+from chromadb.config import Settings  # TODO: verify this import path for chromadb==1.5.7
 import openai
 from openai import OpenAI
 import hashlib
 import time
 from datetime import datetime
 import argparse
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction  # TODO: verify this import path for chromadb==1.5.7
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -63,10 +63,22 @@ class ChromaEmbeddingPipelineTextOnly:
             chunk_size: Maximum size of text chunks
             chunk_overlap: Overlap between chunks
         """
-        # TODO: Initialize OpenAI client
-        # TODO: Store configuration parameters
-        # TODO: Initialize ChromaDB client
-        # TODO: Create or get collection
+        # Initialize OpenAI client
+        self.openai_client = OpenAI(
+            api_key=openai_api_key,
+            base_url=os.getenv("OPENAI_BASE_URL", "https://openai.vocareum.com/v1")
+        )
+        # Store configuration parameters
+        self.embedding_model = embedding_model
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.collection_name = collection_name
+        self.chroma_persist_directory = chroma_persist_directory
+        # Initialize ChromaDB client
+        self.chroma_client = chromadb.PersistentClient(path=chroma_persist_directory)
+        # Create or get collection
+        self.collection = self.chroma_client.get_or_create_collection(name=collection_name)
+        logger.info(f"Collection '{collection_name}' ready with {self.collection.count()} documents")
     
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
         """
