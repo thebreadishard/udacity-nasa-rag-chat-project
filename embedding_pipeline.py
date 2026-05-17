@@ -500,11 +500,32 @@ class ChromaEmbeddingPipelineTextOnly:
             'missions': {}
         }
         
-        # TODO: Get files to process
-        # TODO: Loop through each file
-        # TODO: Process file and add to collection
-        # TODO: Update statistics
-        # TODO: Handle errors gracefully
+        # Get files to process
+        text_files = self.scan_text_files_only(base_path)
+        
+        # Loop through each file
+        for file_path in text_files:
+            try:
+                # Process file and add to collection
+                chunks = self.process_text_file(file_path)
+                file_stats = self.add_documents_to_collection(chunks, file_path, update_mode=update_mode)
+                
+                # Update statistics
+                stats['files_processed'] += 1
+                stats['documents_added'] += file_stats['added']
+                stats['documents_updated'] += file_stats['updated']
+                stats['documents_skipped'] += file_stats['skipped']
+                stats['total_chunks'] += len(chunks)
+                
+                mission = self.extract_mission_from_path(file_path)
+                if mission not in stats['missions']:
+                    stats['missions'][mission] = 0
+                stats['missions'][mission] += len(chunks)
+                
+            except Exception as e:
+                # Handle errors gracefully
+                print(f"Error processing {file_path}: {e}")
+                stats['errors'] += 1
         
         return stats
     
