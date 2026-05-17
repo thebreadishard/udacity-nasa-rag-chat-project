@@ -62,7 +62,11 @@ By completing this project, students will learn to:
    ```
    OPENAI_API_KEY=your-api-key-here
    OPENAI_BASE_URL=https://openai.vocareum.com/v1
+   CHUNK_SIZE=3000
+   CHUNK_OVERLAP=300
    ```
+
+   `CHUNK_SIZE` and `CHUNK_OVERLAP` control how documents are split before embedding. The defaults above (~750 tokens per chunk) are a good balance between retrieval quality and pipeline speed. Smaller values increase quality slightly but significantly increase the number of API calls.
 
    Or set it as an environment variable:
    ```bash
@@ -180,7 +184,7 @@ Each file contains strategically placed TODO comments that guide you through:
 ### **Expected Data Structure**
 The system expects NASA document data organized in folders:
 ```
-data/
+data_text/
 ├── apollo11/           # Apollo 11 mission documents
 │   ├── *.txt          # Text files with mission data
 ├── apollo13/           # Apollo 13 mission documents
