@@ -40,14 +40,37 @@ By completing this project, students will learn to:
    cd project
    ```
 
-2. **Install dependencies**:
+2. **Create and activate a virtual environment**:
+   ```bash
+   # macOS/Linux
+   python -m venv .venv
+   source .venv/bin/activate
+
+   # Windows (PowerShell)
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set up your OpenAI API key**:
+4. **Set up your OpenAI API key**:
+
+   Create a `.env` file in the project root (recommended):
+   ```
+   OPENAI_API_KEY=your-api-key-here
+   OPENAI_BASE_URL=https://openai.vocareum.com/v1
+   ```
+
+   Or set it as an environment variable:
    ```bash
+   # macOS/Linux
    export OPENAI_API_KEY="your-api-key-here"
+
+   # Windows (PowerShell)
+   $env:OPENAI_API_KEY="your-api-key-here"
    ```
 
 ## 📚 Learning Path
@@ -219,7 +242,7 @@ data/
 1. **Run the complete pipeline**:
    ```bash
    # Process documents
-   python embedding_pipeline.py --openai-key YOUR_KEY --data-path ./data
+   python embedding_pipeline.py --openai-key YOUR_KEY --data-path ./data_text
    
    # Launch chat interface
    streamlit run chat.py

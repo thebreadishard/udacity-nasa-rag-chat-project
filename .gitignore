@@ -26,6 +26,12 @@ env/
 .vscode/
 .idea/
 
+# ChromaDB generated database
+chroma_db_openai/
+
+# Pipeline logs
+*.log
+
 # OS
 .DS_Store
 Thumbs.db
